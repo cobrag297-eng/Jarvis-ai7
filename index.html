@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#050b14;color:#d8f7ff;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:20px;text-align:center;border-bottom:1px solid #16465b}
+header h1{color:#49dcff;letter-spacing:5px;margin:0}
+header p{color:#7ca8bb;font-size:12px}
+main{max-width:750px;margin:25px auto;padding:15px}
+.core{width:130px;height:130px;border:2px solid #35cfff;border-radius:50%;margin:20px auto;display:grid;place-items:center;box-shadow:0 0 35px #087ba8,inset 0 0 25px #087ba8;animation:pulse 3s infinite}
+.core span{font-size:35px;color:#70eaff}
+@keyframes pulse{50%{box-shadow:0 0 55px #087ba8,inset 0 0 35px #087ba8}}
+#status{text-align:center;color:#5ce5ff;font-size:12px}
+#chat{height:320px;overflow:auto;border:1px solid #16465b;border-radius:12px;padding:14px;background:#08121e}
+.msg{padding:11px;margin:8px 0;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.ai{background:#102838;color:#bdefff}
+.user{background:#123a43;color:#fff;text-align:right}
+.controls{display:flex;gap:8px;margin-top:12px}
+input{min-width:0;flex:1;background:#0b1724;border:1px solid #24728b;color:white;padding:14px;border-radius:8px}
+button{background:#0c6885;color:white;border:0;border-radius:8px;padding:12px;cursor:pointer}
+button:active{opacity:.7}
+.buttons{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.note{font-size:12px;color:#8aa5b5;line-height:1.6;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+<h1>J.A.R.V.I.S</h1>
+<p>PERSONAL AI INTERFACE · WEB EDITION</p>
+</header>
+<main>
+<div class="core"><span>J</span></div>
+<div id="status">SYSTEM ONLINE · DEMO MODE</div>
+<br>
+<div id="chat">
+<div class="msg ai">Hello! I am JARVIS.My interface is online. I can respond to basic commands in demo mode.
+
+For real AI conversations, an AI service must be connected.</div>
+
+</div>
+<div class="controls">
+<input id="input" placeholder="Ask JARVIS something..." autocomplete="off">
+<button id="send">SEND</button>
+</div>
+<div class="buttons">
+<button id="voice">🎙 SPEAK</button>
+<button id="speak">🔊 VOICE ON/OFF</button>
+<button id="clear">CLEAR CHAT</button>
+</div>
+<div class="note">JARVIS WEB EDITION · Browser demo. This version does not yet connect to a real AI service. Voice recognition depends on browser support.</div>
+</main>
+<script>
+const chat=document.getElementById('chat');
+const input=document.getElementById('input');
+const status=document.getElementById('status');
+let voiceOn=true;function add(text,who){
+const el=document.createElement('div');
+el.className='msg '+who;
+el.textContent=text;
+chat.appendChild(el);
+chat.scrollTop=chat.scrollHeight;
+}
+function respond(text){
+const t=text.toLowerCase();
+if(t.includes('hello')||t.includes('hi'))return 'Hello! JARVIS systems are ready. How can I help you?';
+if(t.includes('your name')||t.includes('who are you'))return 'I am JARVIS, your browser-based assistant interface.';
+if(t.includes('time'))return 'Your device time is '+new Date().toLocaleTimeString()+'.';
+if(t.includes('date'))return 'Today is '+new Date().toLocaleDateString()+'.';
+if(t.includes('html')||t.includes('python')||t.includes('coding'))return 'I can help with coding once a real AI service is connected. This demo cannot generate full AI answers yet.';
+if(t.includes('help'))return 'Try asking about the time, date, or say hello. For general questions, connect a real AI backend.';
+return 'I received your message. This is currently demo mode, so I cannot generate a real AI answer yet. A secure AI backend is needed to unlock full JARVIS intelligence.';
+}
+function send(){
+const text=input.value.trim();
+if(!text)return;
+add(text,'user');
+input.value='';
+const answer=respond(text);
+add(answer,'ai');
+if(voiceOn&&'speechSynthesis' in window){
+speechSynthesis.cancel();
+speechSynthesis.speak(new SpeechSynthesisUtterance(answer));
+}
+}
+document.getElementById('send').onclick=send;
+input.addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+document.getElementById('speak').onclick=()=>{
+voiceOn=!voiceOn;
+status.textContent=voiceOn?'VOICE OUTPUT ON':'VOICE OUTPUT OFF';
+};
+document.getElementById('clear').onclick=()=>{
+chat.replaceChildren();
+add('Chat cleared. JARVIS is ready.','ai');
+};
+document.getElementById('voice').onclick=()=>{
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){status.textContent='VOICE INPUT NOT SUPPORTED IN THIS BROWSER';return}
+const rec=new SR();
+rec.lang='en-US';
+rec.onstart=()=>status.textContent='LISTENING...';
+rec.onresult=e=>{
+input.value=e.results[0][0].transcript;
+send();
+};
+rec.onerror=()=>status.textContent='VOICE ERROR · TRY TYPING';
+rec.onend=()=>status.textContent='SYSTEM ONLINE';
+rec.start();
+};
+</script>
+
+</body>
+</html> 
